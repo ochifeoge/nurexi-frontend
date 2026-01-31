@@ -8,7 +8,9 @@ import {
   User,
   Bell,
 } from "lucide-react";
-import { GiHypodermicTest } from "react-icons/gi";
+import { GiHypodermicTest, GiTeacher } from "react-icons/gi";
+import { MdVerified } from "react-icons/md";
+import { PiCurrencyNgn } from "react-icons/pi";
 import { IconType } from "react-icons/lib";
 import type { LucideIcon } from "lucide-react";
 
@@ -21,7 +23,7 @@ export interface SidebarLink {
 export interface SidebarAccountLink {
   name: string;
   link: string;
-  icon: LucideIcon;
+  icon: LucideIcon | IconType;
 }
 
 export type SidebarItem = SidebarLink;
@@ -63,15 +65,51 @@ export const sidebarLinks: SidebarItem[] = [
     icon: Library,
   },
 ];
+
+export const EducatorsLinks = [
+  {
+    name: "Dashboard",
+    link: "/learner/",
+    icon: LayoutDashboard,
+  },
+  {
+    name: "Course Upload",
+    link: "/educator/course-upload",
+    icon: GiTeacher,
+  },
+  {
+    name: "Verification",
+    link: "/educator/verification",
+    icon: MdVerified,
+  },
+];
 export const accountLinks: SidebarAccountLink[] = [
   {
     name: "Profile",
-    link: "/account/profile",
+    link: "/learner/profile",
     icon: User,
   },
   {
     name: "Notifications",
-    link: "/account/notifications",
+    link: "/learner/notification",
+    icon: Bell,
+  },
+];
+
+export const educatorLinks: SidebarAccountLink[] = [
+  {
+    name: "Profile",
+    link: "/educator/profile",
+    icon: User,
+  },
+  {
+    name: "Earnings",
+    link: "/educator/notification",
+    icon: PiCurrencyNgn,
+  },
+  {
+    name: "Notifications",
+    link: "/educator/notification",
     icon: Bell,
   },
 ];

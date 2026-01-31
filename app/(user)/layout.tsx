@@ -5,6 +5,7 @@ import { Bell } from "lucide-react";
 import { ReactNode } from "react";
 import { MobileSidebar } from "@/components/web/MobileSidebar";
 import { ModeToggle } from "@/components/web/ThemeSwitcher";
+import Link from "next/link";
 
 export default function Layout({ children }: { children: ReactNode }) {
   return (
@@ -28,12 +29,14 @@ export default function Layout({ children }: { children: ReactNode }) {
           <Input
             type="search"
             placeholder="Search for topics"
-            className="h-9 w-2/3 bg-primary-light"
+            className="h-9 md:w-2/3 bg-primary-light"
           />
         </div>
 
         <div className="flex items-center gap-3">
-          <Bell size={18} />
+          <Link href={"/learner/notification"}>
+            <Bell size={18} />
+          </Link>
           <Avatar className="h-8 w-8">
             <AvatarImage src="https://i.pravatar.cc/100" />
             <AvatarFallback>OC</AvatarFallback>
@@ -47,7 +50,7 @@ export default function Layout({ children }: { children: ReactNode }) {
         className="
           pt-12
           md:ml-11
-          px-4
+          md:px-4
         "
       >
         {children}
