@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import * as z from "zod";
-import { User, Mail, Lock, Eye, EyeOff } from "lucide-react";
+import { User, Mail, Lock, Eye, EyeOff, Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -20,7 +20,12 @@ import { signupSchema } from "@/lib/validators/auth";
 import { Checkbox } from "@/components/ui/checkbox";
 import { FaXTwitter } from "react-icons/fa6";
 import { FcGoogle } from "react-icons/fc";
-import { useState } from "react";
+import { useState, useTransition } from "react";
+import {
+  AuthenticateWithGoogle,
+  AuthenticateWithX,
+  SignUp,
+} from "../../lib/actions/auth";
 
 type SignupFormValues = z.infer<typeof signupSchema>;
 
@@ -36,13 +41,36 @@ export function RegisterForm() {
     },
   });
 
+  const [isPending, startTransition] = useTransition();
+
   function onSubmit(data: SignupFormValues) {
-    toast.success("Signup payload", {
-      description: (
-        <pre className="mt-2 rounded-md bg-muted p-4 text-sm">
-          {JSON.stringify(data, null, 2)}
-        </pre>
-      ),
+    startTransition(async () => {
+      try {
+        const payload = {
+          email: data.email,
+          password: data.password,
+          fullName: data.fullName,
+        };
+
+        await SignUp(payload);
+        toast.success("Account created successfully", {
+          description: (
+            <div className="mt-2 rounded-md bg-muted p-4 text-sm">
+              Please check your email for verification
+            </div>
+          ),
+        });
+      } catch (error) {
+        if (error instanceof Error) {
+          if (error.message.includes("NEXT_REDIRECT")) {
+            return;
+          }
+          console.log(error);
+          toast.error(error.message);
+        } else {
+          toast.error("Something went wrong");
+        }
+      }
     });
   }
 
@@ -178,8 +206,14 @@ export function RegisterForm() {
             />
           </FieldGroup>
 
-          <Button type="submit" className="w-full">
-            Sign up
+          <Button type="submit" disabled={isPending} className="w-full">
+            {isPending ? (
+              <span className="flex items-center gap-2">
+                Signing up <Loader2 className="animate-spin " />{" "}
+              </span>
+            ) : (
+              <span> Sign up</span>
+            )}
           </Button>
 
           {/* Separator */}
@@ -191,12 +225,22 @@ export function RegisterForm() {
 
           {/* Social Auth */}
           <div className="grid grid-cols-2 gap-3">
-            <Button variant="outline" type="button">
+            <Button
+              disabled={isPending}
+              variant="outline"
+              type="button"
+              onClick={async () => await AuthenticateWithGoogle()}
+            >
               <FcGoogle className="mr-2 h-4 w-4" />
               Continue with Google
             </Button>
 
-            <Button variant="outline" type="button">
+            <Button
+              disabled={isPending}
+              variant="outline"
+              onClick={async () => await AuthenticateWithX()}
+              type="button"
+            >
               <FaXTwitter className="mr-2 h-4 w-4" />X
             </Button>
           </div>

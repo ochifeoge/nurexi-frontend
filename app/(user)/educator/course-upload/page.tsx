@@ -1,5 +1,6 @@
 import DashboardCaption from "@/components/web/DashboardCaption";
-import CreateOrManage from "./CreateOrManage";
+import CreateOrManage from "@/components/user/educator/course-upload/CreateOrManage";
+import { Suspense } from "react";
 
 export default function UploadCourse() {
   return (
@@ -10,7 +11,9 @@ export default function UploadCourse() {
       />
 
       <main className="md:px-2">
-        <CreateOrManage />
+        <Suspense fallback={<div>Loading...</div>}>
+          <CreateOrManage />
+        </Suspense>
       </main>
     </>
   );

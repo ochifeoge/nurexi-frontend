@@ -15,7 +15,7 @@ export default function Layout({ children }: { children: ReactNode }) {
       {/* Header */}
       <header
         className="
-          fixed top-0 right-0 z-30
+          fixed top-0 right-0 z-60
           bg-background
           h-12
           w-full md:w-[calc(100%-2.75rem)]
@@ -48,6 +48,7 @@ export default function Layout({ children }: { children: ReactNode }) {
       {/* Content */}
       <section
         className="
+        px-1
           pt-12
           md:ml-11
           md:px-4

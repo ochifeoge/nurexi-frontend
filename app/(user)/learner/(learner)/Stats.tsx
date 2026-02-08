@@ -10,7 +10,7 @@ export default function StatsGrid() {
         return (
           <Card
             className="
-            mt-4"
+            md:mt-4"
             key={item.label}
           >
             <CardDescription

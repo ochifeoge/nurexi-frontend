@@ -10,7 +10,7 @@ import {
   sidebarLinks,
 } from "@/lib/exports/links";
 
-export function SidebarContent() {
+export function SidebarContent({ onClick }: { onClick: () => void }) {
   const pathname = usePathname();
   console.log(pathname);
 
@@ -30,7 +30,7 @@ export function SidebarContent() {
           const active = pathname === item.link;
 
           return (
-            <li key={item.name}>
+            <li key={item.name} onClick={onClick}>
               <Link
                 href={item.link}
                 className={clsx(
@@ -40,10 +40,7 @@ export function SidebarContent() {
                   active && "bg-primary-light-active text-black!",
                 )}
               >
-                <Icon
-                  size={20}
-                  className="transition-transform  group-hover/item:scale-110"
-                />
+                <Icon size={20} className="  " />
 
                 <span
                   className="
@@ -52,7 +49,7 @@ export function SidebarContent() {
                    
                     group-hover/sidebar:block
                     group-hover/sidebar:opacity-100 group-hover/sidebar:translate-x-0
-                    transition-all duration-200
+                    transition-all duration-300 ease-in-out
                   "
                 >
                   {item.name}
@@ -94,10 +91,7 @@ export function SidebarContent() {
                       active && "bg-primary-light-active text-black!",
                     )}
                   >
-                    <Icon
-                      size={18}
-                      className="transition-transform  group-hover/item:scale-110"
-                    />
+                    <Icon size={18} className="  " />
                     <span
                       className="
                         whitespace-nowrap

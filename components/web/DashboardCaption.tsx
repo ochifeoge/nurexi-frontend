@@ -7,7 +7,7 @@ const DashboardCaption = ({
 }) => {
   return (
     <div className="h-29.25 px-4 bg-linear-to-r text-white/82 overflow-hidden from-[#0C3A5F] to-[#6CB4EE] flex flex-col justify-center relative gap-2">
-      <h2 className="t">{heading}</h2>
+      <h2 className="max-sm:text-lg">{heading}</h2>
       <p>{text}</p>
 
       <div className="absolute -right-14 translate-x-1 bg-radial from-[#a9ceec] to-[#388fd6] rounded-full h-24 w-24"></div>

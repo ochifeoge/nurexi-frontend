@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/item";
 import { Badge } from "@/components/ui/badge";
 import { Pencil, FileText } from "lucide-react";
+import Link from "next/link";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -101,8 +102,23 @@ const ManageCourse = () => {
                 variant="ghost"
                 size="icon"
                 className="text-muted-foreground hover:text-foreground"
+                onClick={() => {
+                  const params = new URLSearchParams(window.location.search);
+                  params.set("type", "edit");
+                  params.set("courseId", course.id);
+                  // Reset to first section when entering edit mode
+                  params.set("section", "course-overview");
+                  window.history.pushState(null, "", `?${params.toString()}`);
+                  // Force re-render or use router if parent doesn't detect pushState (Next.js Link/Router is better)
+                  // But since this is a client component inside a page that uses searchParams,
+                  // the clean way is to use the Next.js router.
+                }}
               >
-                <Pencil size={16} />
+                <Link
+                  href={`?type=edit&courseId=${course.id}&section=course-overview`}
+                >
+                  <Pencil size={16} />
+                </Link>
               </Button>
             </ItemActions>
           </Item>

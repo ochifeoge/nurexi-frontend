@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import * as z from "zod";
-import { Mail, Lock, Eye, EyeOff } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -20,9 +20,14 @@ import { loginSchema } from "@/lib/validators/auth";
 import { Checkbox } from "@/components/ui/checkbox";
 import { FaXTwitter } from "react-icons/fa6";
 import { FcGoogle } from "react-icons/fc";
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import {
+  AuthenticateWithGoogle,
+  AuthenticateWithX,
+  Login,
+} from "../../lib/actions/auth";
 
 type loginFormValues = z.infer<typeof loginSchema>;
 
@@ -38,11 +43,32 @@ export function LoginForm() {
   });
 
   const router = useRouter();
+
+  const [isPending, startTransition] = useTransition();
+
   function onSubmit(data: loginFormValues) {
-    toast.success("success", {
-      description: <p className="bodyText">Welcome</p>,
+    startTransition(async () => {
+      try {
+        await Login(data);
+        toast.success("success", {
+          description: <p className="bodyText">Welcome back</p>,
+        });
+      } catch (error) {
+        console.log(error);
+        if (error instanceof Error) {
+          if (error.message.includes("NEXT_REDIRECT")) {
+            return;
+          }
+          toast.error("Error", {
+            description: <p className="bodyText">{error.message}</p>,
+          });
+        } else {
+          toast.error("Error", {
+            description: <p className="bodyText">Something went wrong</p>,
+          });
+        }
+      }
     });
-    router.push("/welcome");
   }
 
   const [showPassword, setShowPassword] = useState(false);
@@ -125,7 +151,7 @@ export function LoginForm() {
 
               <Link
                 className="hover:underline text-muted-foreground text-xs"
-                href={"/forgot-password"}
+                href={"/account/reset-password"}
               >
                 Forgotten password?
               </Link>
@@ -133,7 +159,13 @@ export function LoginForm() {
           </FieldGroup>
 
           <Button type="submit" className="w-full">
-            Login
+            {isPending ? (
+              <span className="flex items-center gap-2">
+                Logging in <Loader2 className="animate-spin " />{" "}
+              </span>
+            ) : (
+              <span> Login</span>
+            )}
           </Button>
 
           {/* Separator */}
@@ -145,12 +177,20 @@ export function LoginForm() {
 
           {/* Social Auth */}
           <div className="grid grid-cols-2 gap-3">
-            <Button variant="outline" type="button">
+            <Button
+              variant="outline"
+              type="button"
+              onClick={async () => await AuthenticateWithGoogle()}
+            >
               <FcGoogle className="mr-2 h-4 w-4" />
               Continue with Google
             </Button>
 
-            <Button variant="outline" type="button">
+            <Button
+              variant="outline"
+              type="button"
+              onClick={async () => await AuthenticateWithX()}
+            >
               <FaXTwitter className="mr-2 h-4 w-4" />X
             </Button>
           </div>

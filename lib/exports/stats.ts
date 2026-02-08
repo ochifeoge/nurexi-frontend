@@ -34,16 +34,17 @@ export const stats = [
 export const weeklyPracticeStats = [
   {
     label: "Take Mock Exam",
-
+    href: "/learner/exam",
     icon: BookOpen,
   },
   {
     label: "Practice Questions",
-
+    href: "/learner/practice",
     icon: FileQuestionMark,
   },
   {
     label: "View Progress",
+    href: "/learner/analytics",
 
     icon: TrendingUp,
   },
