@@ -1,13 +1,14 @@
 "use client";
 import Completed from "@/components/user/learner/exam/Completed";
 import NMCNQuestions from "@/components/user/learner/exam/NMCNQuestion";
-import { useAppContext } from "@/context/AppProvider";
+import { useAppSelector } from "@/hooks/StoreHooks";
 const ClientPage = () => {
-  const { showResult } = useAppContext();
+  const examStatus = useAppSelector((store) => store.exam.status);
 
   return (
     <div className="bg-white py-2 md:mt-2 px-6.25">
-      {showResult ? <Completed /> : <NMCNQuestions />}
+      {examStatus === "completed" && <Completed />}
+      {examStatus === "in-progress" && <NMCNQuestions />}
     </div>
   );
 };

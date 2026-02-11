@@ -2,15 +2,16 @@
 
 import ExamTypeCard from "@/components/web/ExamTypeCard";
 import { examTypes } from "@/lib/types/mock-exam";
-import { useAppContext } from "@/context/AppProvider";
 import { Label } from "@/components/ui/label";
 import { BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { useAppDispatch, useAppSelector } from "@/hooks/StoreHooks";
+import { setExamDuration, startExam } from "@/lib/features/exam/examSlice";
 
 const SelectExamType = () => {
-  const { examType, examDuration, setExamDuration } = useAppContext();
-
+  const { examType, duration } = useAppSelector((store) => store.exam);
+  const dispatch = useAppDispatch();
   return (
     <>
       {/* ALL EXAM TYPES */}
@@ -43,8 +44,10 @@ const SelectExamType = () => {
             <Label htmlFor="duration">Duration</Label>
             <select
               id="duration"
-              defaultValue={examDuration}
-              onChange={(e) => setExamDuration(Number(e.target.value) * 60)}
+              defaultValue={duration}
+              onChange={(e) =>
+                dispatch(setExamDuration(Number(e.target.value) * 60))
+              }
               className="h-9 w-full rounded-md bg-primary-light px-3 text-sm border border-input focus:outline-none"
             >
               <option value={60}>60 minutes</option>
@@ -67,7 +70,11 @@ const SelectExamType = () => {
             </ul>
           </div>
 
-          <Link href="/learner/exam/NMCN" className="w-full">
+          <Link
+            href="/learner/exam/NMCN"
+            onClick={() => dispatch(startExam("nmcn"))}
+            className="w-full"
+          >
             <Button> Start Exam</Button>
           </Link>
         </div>

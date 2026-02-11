@@ -1,29 +1,37 @@
-import { useAppContext } from "@/context/AppProvider";
+import { useAppDispatch, useAppSelector } from "@/hooks/StoreHooks";
+import { setExamStatus } from "@/lib/features/exam/examSlice";
 import { formatTime } from "@/lib/utils";
 import { useEffect, useState } from "react";
 
 const Timer = () => {
-  const { setShowResult, examDuration } = useAppContext();
-  const [timer, setTimer] = useState(examDuration);
+  const { duration, startedAt, status } = useAppSelector((store) => store.exam);
+  const dispatch = useAppDispatch();
+
+  const [timeRemaining, setTimeRemaining] = useState(duration);
   useEffect(() => {
-    // Only run if timer is above 0
-    if (timer <= 0) return;
+    if (status !== "in-progress" && !startedAt) return;
 
     const interval = setInterval(() => {
-      setTimer((prev) => prev - 1);
+      if (!startedAt) return;
+
+      const timeElasped = Math.floor((Date.now() - startedAt) / 1000);
+      const remaining = duration - timeElasped;
+
+      if (remaining <= 0) {
+        setTimeRemaining(0);
+        clearInterval(interval);
+        dispatch(setExamStatus("submitted"));
+      }
+
+      setTimeRemaining(remaining);
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [timer]);
+  }, [status, startedAt, duration]);
 
-  useEffect(() => {
-    if (timer <= 0) {
-      setShowResult(true);
-    }
-  }, [timer]);
   return (
-    <p className={`${timer < 600 && "text-destructive"}`}>
-      Time left:{formatTime(timer)}
+    <p className={`${timeRemaining < 600 && "text-destructive"}`}>
+      Time left:{formatTime(timeRemaining)}
     </p>
   );
 };

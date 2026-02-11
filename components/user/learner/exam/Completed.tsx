@@ -2,10 +2,11 @@
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import Award from "@/components/web/Success";
-import { useAppContext } from "@/context/AppProvider";
+import { useAppDispatch, useAppSelector } from "@/hooks/StoreHooks";
 
 const Completed = () => {
-  const { answeredQuestionsProgress, setShowResult } = useAppContext();
+  const { score } = useAppSelector((store) => store.exam);
+  const dispatch = useAppDispatch();
   return (
     <div className="mt-12.5 min-h-[70dvh]">
       <div className="flex items-center flex-col mb-6 text-center">
@@ -17,21 +18,26 @@ const Completed = () => {
 
         <div className="space-y-2">
           <p className="bodyText text-muted-foreground">Your score</p>
-          <h4>36/50</h4>
+          <h4>
+            {score?.correct}/{score?.total}
+          </h4>
         </div>
         <div className="space-y-2">
           <p className="bodyText text-muted-foreground">Accuracy</p>
-          <h4>72%</h4>
+          <h4>{score?.percentage}%</h4>
         </div>
       </div>
 
-      <Progress value={answeredQuestionsProgress} />
+      <Progress value={score?.percentage} />
 
-      <div className="flex items-center gap-2">
-        <Button onClick={() => setShowResult(false)} variant={"outline"}>
+      <div className="flex items-center w-full justify-center gap-4">
+        <Button
+          onClick={() => console.log("view explanations")}
+          variant={"outline"}
+        >
           View Explanations
         </Button>
-        <Button onClick={() => setShowResult(false)}>Retake Exam</Button>
+        <Button onClick={() => console.log("retake exam")}>Retake Exam</Button>
       </div>
     </div>
   );
