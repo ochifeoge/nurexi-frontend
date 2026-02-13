@@ -8,19 +8,22 @@ import QuestionRenderer from "@/components/web/QuestionRenderer";
 import Timer from "@/components/web/Timer";
 import { useAppDispatch, useAppSelector } from "@/hooks/StoreHooks";
 import {
+  endExam,
   setCurrentQuestionIndex,
   setNextQuestion,
   setPreviousQuestion,
   setQuestions,
 } from "@/lib/features/exam/examSlice";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
+import EndExamDialog from "./EndExamDialog";
 
 const NMCNQuestions = () => {
-  const { progress, currentQuestionIndex, questions, answers } = useAppSelector(
-    (store) => store.exam,
-  );
+  const { progress, currentQuestionIndex, questions, answers, status } =
+    useAppSelector((store) => store.exam);
   const dispatch = useAppDispatch();
+  const router = useRouter();
 
   // question fetching
   const [loading, setLoading] = useState(false);
@@ -47,6 +50,13 @@ const NMCNQuestions = () => {
 
   return (
     <div className="bg-white  mt-4 min-h-[528px] rounded-xl">
+      <EndExamDialog type="quit">
+        <button className="flex cursor-pointer items-center gap-1 text-xs mb-2">
+          <MdKeyboardArrowLeft />
+          <span>Quit Exam</span>
+        </button>
+      </EndExamDialog>
+
       <div className="flex items-center justify-between">
         <h4 className="font-light">
           Question {currentQuestionIndex + 1} of {questions.length}
@@ -75,16 +85,28 @@ const NMCNQuestions = () => {
           <MdKeyboardArrowLeft />
           Previous
         </Button>
-        <Button onClick={() => dispatch(setNextQuestion())}>
-          {currentQuestionIndex === questions.length - 1 ? (
-            <>Finish</>
+        {currentQuestionIndex === questions.length - 1 ? (
+          status === "review" ? (
+            <Button
+              variant={"destructive"}
+              onClick={() => {
+                dispatch(endExam());
+                router.push("/learner/exam");
+              }}
+            >
+              End Exam
+            </Button>
           ) : (
-            <>
-              Next
-              <MdKeyboardArrowRight />
-            </>
-          )}
-        </Button>
+            <EndExamDialog type="finish">
+              <Button variant={"destructive"}>Finish Exam</Button>
+            </EndExamDialog>
+          )
+        ) : (
+          <Button onClick={() => dispatch(setNextQuestion())}>
+            Next
+            <MdKeyboardArrowRight />
+          </Button>
+        )}
       </div>
 
       <div className="mt-4 grid grid-cols-[repeat(auto-fit,minmax(2.5rem,1fr))] md:grid-cols-[repeat(auto-fit,minmax(4.5rem,1fr))] lg:grid-cols-[repeat(auto-fit,minmax(5.5rem,1fr))] gap-2">

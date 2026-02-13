@@ -3,12 +3,15 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import Award from "@/components/web/Success";
 import { useAppDispatch, useAppSelector } from "@/hooks/StoreHooks";
+import { restartExam, reviewExam } from "@/lib/features/exam/examSlice";
+import PerformanceBySubject from "./PerformanceBySubject";
 
 const Completed = () => {
   const { score } = useAppSelector((store) => store.exam);
   const dispatch = useAppDispatch();
+  // h-[calc(100vh-6rem)] lg:h-[calc(100vh-9rem)]
   return (
-    <div className="mt-12.5 min-h-[70dvh]">
+    <div className="mt-4 md:mt-6 p-4 min-h-[70dvh] ">
       <div className="flex items-center flex-col mb-6 text-center">
         <Award />
         <div className="space-y-2">
@@ -28,16 +31,15 @@ const Completed = () => {
         </div>
       </div>
 
-      <Progress value={score?.percentage} />
+      <Progress className="my-2" value={score?.percentage} />
+
+      <PerformanceBySubject />
 
       <div className="flex items-center w-full justify-center gap-4">
-        <Button
-          onClick={() => console.log("view explanations")}
-          variant={"outline"}
-        >
+        <Button onClick={() => dispatch(reviewExam())} variant={"outline"}>
           View Explanations
         </Button>
-        <Button onClick={() => console.log("retake exam")}>Retake Exam</Button>
+        <Button onClick={() => dispatch(restartExam())}>Retake Exam</Button>
       </div>
     </div>
   );

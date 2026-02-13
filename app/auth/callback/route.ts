@@ -29,6 +29,7 @@ export async function GET(request: Request) {
           id: user.id,
           email: user.email,
           full_name: user.user_metadata?.displayName ?? null,
+          avatar_url: user.user_metadata?.avatar_url ?? null,
           roles: ["learner"],
         });
       } else {
