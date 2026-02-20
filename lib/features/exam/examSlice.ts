@@ -58,6 +58,35 @@ const examSlice = createSlice({
       state.answers = [];
       state.startedAt = Date.now();
     },
+    submitExam: (state) => {
+      state.status = "completed";
+
+      const correctAnswers = state.answers.filter((answer) => {
+        const question = state.questions.find(
+          (q) => q.id === answer.questionId,
+        );
+
+        if (!question) return false;
+
+        if (question.question_type === "fill_in_the_blank") {
+          return (
+            answer.selected.trim().toLowerCase() ===
+            question.correct_answer.trim().toLowerCase()
+          );
+        }
+
+        return answer.selected === question.correct_answer;
+      }).length;
+
+      state.score = {
+        correct: correctAnswers,
+        total: state.questions.length, // or use points if exam type is different
+        percentage: Math.round((correctAnswers / state.questions.length) * 100),
+      };
+
+      state.showResult = true;
+    },
+
     setExamType: (state, action) => {
       state.examType = action.payload;
     },
@@ -89,21 +118,6 @@ const examSlice = createSlice({
     },
     setNextQuestion: (state) => {
       if (state.currentQuestionIndex === state.questions.length - 1) {
-        state.status = "completed";
-        // Calculate score here
-        const correctAnswers = state.answers.filter((answer) => {
-          const question = state.questions.find(
-            (q) => q.id === answer.questionId,
-          );
-          return question && answer.selected === question.correct_answer;
-        }).length;
-        state.score = {
-          correct: correctAnswers,
-          total: state.questions.length, // sum up all points later if question type uses point system
-          percentage: Math.round(
-            (correctAnswers / state.questions.length) * 100,
-          ),
-        };
         return;
       }
       state.currentQuestionIndex += 1;
@@ -117,6 +131,40 @@ const examSlice = createSlice({
       } else {
         state.answers.push(action.payload);
       }
+    },
+    restartExam: (state) => {
+      state.status = "in-progress";
+      state.showResult = false;
+      state.showExplanation = false;
+      state.progress = 0;
+      state.currentQuestionIndex = 0;
+      state.answers = [];
+      state.startedAt = Date.now();
+      state.score = {
+        correct: 0,
+        total: 0,
+        percentage: 0,
+      };
+    },
+    reviewExam: (state) => {
+      state.status = "review";
+      state.currentQuestionIndex = 0;
+    },
+    endExam: (state) => {
+      state.examType = "all";
+      state.duration = 60 * 60;
+      state.status = "idle";
+      state.showResult = false;
+      state.showExplanation = false;
+      state.progress = 0;
+      state.currentQuestionIndex = 0;
+      state.answers = [];
+      state.startedAt = null;
+      state.score = {
+        correct: 0,
+        total: 0,
+        percentage: 0,
+      };
     },
   },
 });
@@ -134,5 +182,9 @@ export const {
   setPreviousQuestion,
   setNextQuestion,
   setAnswers,
+  restartExam,
+  submitExam,
+  reviewExam,
+  endExam,
 } = examSlice.actions;
 export default examSlice.reducer;

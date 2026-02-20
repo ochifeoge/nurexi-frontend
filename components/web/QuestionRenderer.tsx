@@ -10,16 +10,18 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useAppSelector } from "@/hooks/StoreHooks";
 import { Question } from "@/lib/types/questions";
 import { Field, FieldContent, FieldLabel, FieldTitle } from "../ui/field";
+import { Badge } from "../ui/badge";
 
 export default function QuestionRenderer({ question }: { question: Question }) {
   const dispatch = useDispatch();
-  const { answers, questions } = useAppSelector((state) => state.exam);
+  const { answers, questions, status } = useAppSelector((state) => state.exam);
 
   const selectedAnswer = answers.find(
     (a) => a.questionId === question.id,
   )?.selected;
 
   const handleAnswerChange = (value: string) => {
+    if (status === "review") return;
     dispatch(
       setAnswers({
         questionId: question.id,
@@ -27,6 +29,26 @@ export default function QuestionRenderer({ question }: { question: Question }) {
       }),
     );
   };
+
+  function handleOptionClick(option: string) {
+    if (status === "review") return;
+    dispatch(
+      setAnswers({
+        questionId: question.id,
+        selected: option,
+      }),
+    );
+
+    // More accurate progress calculation
+    const uniqueAnswered = new Set([
+      ...answers.map((a) => a.questionId),
+      question.id,
+    ]);
+
+    const localProgress = (uniqueAnswered.size / questions.length) * 100;
+
+    dispatch(setAnsweredQuestionsProgress(localProgress));
+  }
   const selectedAnswerForCurrent =
     answers.find((a) => a.questionId === question?.id)?.selected || "";
   return (
@@ -48,23 +70,7 @@ export default function QuestionRenderer({ question }: { question: Question }) {
                 htmlFor={option}
                 key={index}
                 onClick={() => {
-                  dispatch(
-                    setAnswers({
-                      questionId: question.id,
-                      selected: option,
-                    }),
-                  );
-
-                  // More accurate progress calculation
-                  const uniqueAnswered = new Set([
-                    ...answers.map((a) => a.questionId),
-                    question.id,
-                  ]);
-
-                  const localProgress =
-                    (uniqueAnswered.size / questions.length) * 100;
-
-                  dispatch(setAnsweredQuestionsProgress(localProgress));
+                  handleOptionClick(option);
                 }}
                 className={`
           rounded-2xl border p-2 text-[16px]
@@ -100,6 +106,34 @@ export default function QuestionRenderer({ question }: { question: Question }) {
             onChange={(e) => handleAnswerChange(e.target.value)}
             className="border-none focus-visible:ring-0 text-lg"
           />
+        </div>
+      )}
+
+      {/* REVIEW MODE */}
+      {status === "review" && (
+        <div className="mt-4 space-y-4">
+          <div className="flex items-center flex-wrap gap-2">
+            <Badge
+              variant={
+                selectedAnswer === question.correct_answer
+                  ? "default"
+                  : "destructive"
+              }
+            >
+              {selectedAnswer === question.correct_answer
+                ? "Correct"
+                : "Incorrect"}
+            </Badge>
+            <Badge
+              variant="secondary"
+              className="whitespace-normal wrap-break-word max-w-full h-auto py-1 "
+            >
+              Correct: {question.correct_answer}
+            </Badge>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            {question.explanation}
+          </p>
         </div>
       )}
     </div>

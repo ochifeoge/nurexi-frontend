@@ -8,7 +8,9 @@ const ClientPage = () => {
   return (
     <div className="bg-white py-2 md:mt-2 px-6.25">
       {examStatus === "completed" && <Completed />}
-      {examStatus === "in-progress" && <NMCNQuestions />}
+      {(examStatus === "in-progress" || examStatus === "review") && (
+        <NMCNQuestions />
+      )}
     </div>
   );
 };
