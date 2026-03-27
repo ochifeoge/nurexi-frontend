@@ -7,7 +7,7 @@ interface ExamState {
   session: number | string;
   status: "idle" | "in-progress" | "review" | "completed";
   showResult: boolean;
-  score?: {
+  score: {
     correct: number;
     total: number;
     percentage: number;

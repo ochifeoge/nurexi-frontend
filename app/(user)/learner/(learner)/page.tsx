@@ -6,9 +6,27 @@ import { Recommended } from "@/components/web/Recomendations";
 import DashboardCaption from "@/components/web/DashboardCaption";
 import { GetUserProfile } from "@/lib/actions/auth";
 import Link from "next/link";
+import { createClient } from "@/lib/supabase/server";
 
 export default async function Page() {
+  const supabase = await createClient();
   const user = await GetUserProfile();
+
+  const { data: stats, error: statsError } = await supabase
+    .from("learner_stats")
+    .select("*")
+    .eq("user_id", user?.id)
+    .single();
+
+  console.log(stats);
+  console.log(statsError);
+  if (statsError) {
+    return (
+      <div className="p-4 border border-destructive bg-destructive/10 rounded">
+        <p>Could not load your stats. Please refresh the page.</p>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -17,7 +35,7 @@ export default async function Page() {
         text="Let's continue your NMCN exam preparation journey"
       />
 
-      <StatsGrid />
+      <StatsGrid stats={stats} />
 
       <div className="my-4 ">
         <div className="flex flex-col gap-0.5 mb-2 ">

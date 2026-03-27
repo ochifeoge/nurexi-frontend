@@ -1,4 +1,5 @@
 "use client";
+
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -12,9 +13,12 @@ import {
 } from "@/components/ui/dialog";
 import { useAppDispatch, useAppSelector } from "@/hooks/StoreHooks";
 import { endExam, submitExam } from "@/lib/features/exam/examSlice";
+import { selectPerformanceBySubject } from "@/lib/features/exam/customSelector";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { useState } from "react";
+import { saveExamResult } from "@/lib/actions/exam-actions";
 
-// type is finish then submit exam otherwise end exam
 const EndExamDialog = ({
   type = "finish",
   children,
@@ -24,9 +28,55 @@ const EndExamDialog = ({
 }) => {
   const dispatch = useAppDispatch();
   const { answers, questions } = useAppSelector((store) => store.exam);
+  const performanceBySubject = useAppSelector(selectPerformanceBySubject);
   const router = useRouter();
+  const [isSaving, setIsSaving] = useState(false);
+  const [open, setOpen] = useState(false);
+
+  const handleSubmit = async () => {
+    setIsSaving(true);
+
+    // Calculate totals from performanceBySubject
+    let totalCorrect = 0;
+    let totalQuestions = 0;
+
+    Object.values(performanceBySubject).forEach((subject: any) => {
+      totalCorrect += subject.correct;
+      totalQuestions += subject.total;
+    });
+
+    const result = {
+      correctCount: totalCorrect,
+      totalQuestions: totalQuestions,
+      performanceBySubject: performanceBySubject,
+    };
+
+    const response = await saveExamResult(result);
+
+    if (response.success && response.streakIncreased) {
+      toast.success(`🔥 ${response.newStreak} day streak!`, {
+        duration: 5000,
+      });
+    } else if (response.success) {
+      toast.success("Results saved successfully!");
+    } else if (!response.success) {
+      toast.error(response.error || "Failed to save results");
+      setIsSaving(false);
+      return;
+    }
+
+    setIsSaving(false);
+    setOpen(false);
+    dispatch(submitExam());
+  };
+
+  const handleQuit = () => {
+    dispatch(endExam());
+    router.push("/learner/exam");
+  };
+
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent>
         <DialogHeader>
@@ -41,30 +91,18 @@ const EndExamDialog = ({
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
-          <DialogClose asChild>
-            <Button variant="outline">Cancel</Button>
-          </DialogClose>
-          <DialogClose asChild>
-            {type === "finish" ? (
-              <Button
-                onClick={() => {
-                  dispatch(submitExam());
-                }}
-              >
-                Submit
-              </Button>
-            ) : (
-              <Button
-                variant={"destructive"}
-                onClick={() => {
-                  dispatch(endExam());
-                  router.push("/learner/exam");
-                }}
-              >
-                Quit
-              </Button>
-            )}
-          </DialogClose>
+          <Button variant="outline" onClick={() => setOpen(false)}>
+            Cancel
+          </Button>
+          {type === "finish" ? (
+            <Button onClick={handleSubmit} disabled={isSaving}>
+              {isSaving ? "Saving..." : "Submit"}
+            </Button>
+          ) : (
+            <Button variant={"destructive"} onClick={handleQuit}>
+              Quit
+            </Button>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>
