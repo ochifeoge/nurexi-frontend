@@ -3,7 +3,6 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import Loader from "@/components/web/Loader";
 import QuestionRenderer from "@/components/web/QuestionRenderer";
 import Timer from "@/components/web/Timer";
 import { useAppDispatch, useAppSelector } from "@/hooks/StoreHooks";
@@ -18,35 +17,29 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
 import EndExamDialog from "./EndExamDialog";
+import { Question } from "@/lib/types/questions";
 
-const NMCNQuestions = () => {
+const Questions = ({
+  fetchedQuestions,
+  examCode,
+}: {
+  fetchedQuestions: Question[];
+  examCode: string;
+}) => {
   const { progress, currentQuestionIndex, questions, answers, status } =
     useAppSelector((store) => store.exam);
   const dispatch = useAppDispatch();
   const router = useRouter();
 
   // question fetching
-  const [loading, setLoading] = useState(false);
   useEffect(() => {
-    async function getqestions() {
-      setLoading(true);
-      const res = await fetch("/data/questions/medical_surgical.json");
-      const ques = await res.json();
-
-      dispatch(setQuestions(ques));
-      setLoading(false);
+    function getqestions() {
+      dispatch(setQuestions(fetchedQuestions));
     }
     getqestions();
-  }, []);
+  }, [fetchedQuestions, dispatch, questions.length]);
 
   const currentQuestion = questions[currentQuestionIndex];
-
-  if (loading)
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <Loader />
-      </div>
-    );
 
   return (
     <div className="bg-white  mt-4 min-h-[528px] rounded-xl">
@@ -65,7 +58,7 @@ const NMCNQuestions = () => {
       </div>
       <Progress value={progress} className="my-4" />
       <div className="flex items-center justify-between">
-        <Badge>NMCN</Badge>
+        <Badge>{examCode.toUpperCase()}</Badge>
         <div className="flex items-center gap-2">
           {currentQuestion?.topics?.map((topic, index) => (
             <Badge variant={"outline"} key={index}>
@@ -127,4 +120,4 @@ const NMCNQuestions = () => {
   );
 };
 
-export default NMCNQuestions;
+export default Questions;
