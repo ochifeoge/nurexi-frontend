@@ -10,6 +10,8 @@ import { useAppSelector } from "@/hooks/StoreHooks";
 import { selectPerformanceBySubject } from "@/lib/features/exam/customSelector";
 const PerformanceBySubject = () => {
   const performance = useAppSelector(selectPerformanceBySubject);
+
+  console.log(performance);
   return (
     <div className="my-4  ">
       <p className="bodyText text-muted-foreground mb-4">

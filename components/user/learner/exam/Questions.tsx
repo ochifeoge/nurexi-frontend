@@ -3,7 +3,6 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import Loader from "@/components/web/Loader";
 import QuestionRenderer from "@/components/web/QuestionRenderer";
 import Timer from "@/components/web/Timer";
 import { useAppDispatch, useAppSelector } from "@/hooks/StoreHooks";
@@ -27,23 +26,14 @@ const Questions = ({
   fetchedQuestions: Question[];
   examCode: string;
 }) => {
-  const {
-    progress,
-    currentQuestionIndex,
-    questions,
-    session,
-    answers,
-    status,
-  } = useAppSelector((store) => store.exam);
+  const { progress, currentQuestionIndex, questions, answers, status } =
+    useAppSelector((store) => store.exam);
   const dispatch = useAppDispatch();
   const router = useRouter();
 
   // question fetching
   useEffect(() => {
     function getqestions() {
-      console.log("fetchedQuestions: ", fetchedQuestions);
-      console.log("questions: ", questions);
-
       dispatch(setQuestions(fetchedQuestions));
     }
     getqestions();
