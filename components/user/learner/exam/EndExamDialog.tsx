@@ -27,7 +27,9 @@ const EndExamDialog = ({
   children: React.ReactNode;
 }) => {
   const dispatch = useAppDispatch();
-  const { answers, questions } = useAppSelector((store) => store.exam);
+  const { answers, questions, score, examType, session } = useAppSelector(
+    (store) => store.exam,
+  );
   const performanceBySubject = useAppSelector(selectPerformanceBySubject);
   const router = useRouter();
   const [isSaving, setIsSaving] = useState(false);
@@ -45,13 +47,16 @@ const EndExamDialog = ({
       totalQuestions += subject.total;
     });
 
-    const result = {
+    const payload = {
       correctCount: totalCorrect,
       totalQuestions: totalQuestions,
       performanceBySubject: performanceBySubject,
+      sessionId: session?.toString() || "",
     };
 
-    const response = await saveExamResult(result);
+    console.log("Submitting exam:", { examType, session, score });
+
+    const response = await saveExamResult(payload);
 
     if (response.success && response.streakIncreased) {
       toast.success(`🔥 ${response.newStreak} day streak!`, {

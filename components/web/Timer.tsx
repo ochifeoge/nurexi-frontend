@@ -9,9 +9,8 @@ import { toast } from "sonner";
 import { saveExamResult } from "@/lib/actions/exam-actions";
 
 const Timer = () => {
-  const { duration, startedAt, status, score, questions } = useAppSelector(
-    (store) => store.exam,
-  );
+  const { duration, startedAt, status, score, questions, session } =
+    useAppSelector((store) => store.exam);
   const performanceBySubject = useAppSelector(selectPerformanceBySubject);
   const dispatch = useAppDispatch();
 
@@ -48,6 +47,7 @@ const Timer = () => {
             correctCount: totalCorrect,
             totalQuestions: totalQuestions,
             performanceBySubject: performanceBySubject,
+            sessionId: session?.toString() || "",
           };
 
           const response = await saveExamResult(result);
@@ -81,6 +81,7 @@ const Timer = () => {
     status,
     startedAt,
     duration,
+    session,
     dispatch,
     score,
     performanceBySubject,

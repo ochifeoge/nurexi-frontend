@@ -18,8 +18,12 @@ export default async function Page() {
     .eq("user_id", user?.id)
     .single();
 
-  console.log(stats);
-  console.log(statsError);
+  const { data: activities } = await supabase
+    .from("user_activities")
+    .select("*")
+    .eq("user_id", user?.id)
+    .order("created_at", { ascending: false })
+    .limit(10);
   if (statsError) {
     return (
       <div className="p-4 border border-destructive bg-destructive/10 rounded">
@@ -32,7 +36,7 @@ export default async function Page() {
     <>
       <DashboardCaption
         heading={`Welcome back, ${user?.full_name}!👋🏾`}
-        text="Let's continue your NMCN exam preparation journey"
+        text="Let's continue your exam preparation journey"
       />
 
       <StatsGrid stats={stats} />
@@ -69,7 +73,7 @@ export default async function Page() {
 
       {/* New Sections */}
       <div className=" flex flex-col md:flex-row gap-4">
-        <RecentActivities />
+        <RecentActivities activities={activities || []} />
         <Recommended />
       </div>
     </>

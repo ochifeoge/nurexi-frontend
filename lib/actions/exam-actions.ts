@@ -2,10 +2,12 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { calculateNewStreak } from "../utils";
+import { addExamActivity } from "./activity-actions";
 
 interface ExamResult {
   correctCount: number;
   totalQuestions: number;
+  sessionId: string;
   performanceBySubject: Record<
     string,
     { correct: number; total: number; percentage: number }
@@ -39,11 +41,16 @@ export async function saveExamResult(result: ExamResult) {
       throw new Error("Failed to fetch user stats");
     }
 
-    // Step 3: Calculate new streak
+    // Calculate new streak
     const newStreak = calculateNewStreak(
       stats.current_streak,
       stats.last_activity_date,
       today,
+    );
+
+    // Calculate score percentage
+    const score = Math.round(
+      (result.correctCount / result.totalQuestions) * 100,
     );
 
     const newTotalAttempts = stats.total_exam_attempts + 1;
@@ -67,6 +74,20 @@ export async function saveExamResult(result: ExamResult) {
 
     if (updateError) {
       throw new Error("Failed to update stats");
+    }
+
+    // Add activity record
+    const activityResult = await addExamActivity({
+      userId: user.id,
+      sessionId: result.sessionId,
+      score: score,
+      correctCount: result.correctCount,
+      totalQuestions: result.totalQuestions,
+    });
+
+    if (!activityResult.success) {
+      console.error("Failed to add activity:", activityResult.error);
+      // Don't throw error - stats already saved
     }
 
     return {
