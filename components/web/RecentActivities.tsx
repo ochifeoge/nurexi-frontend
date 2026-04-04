@@ -72,7 +72,7 @@ export function RecentActivities({
               You haven't started any activities yet. Once you begin practicing,
               they'll appear here.
             </p>
-            <Button size="sm">Start Practice</Button>
+            {/* <Button size="sm">Start Practice</Button> */}
           </div>
         ) : (
           <div className="space-y-4">

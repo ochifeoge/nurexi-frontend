@@ -9,6 +9,8 @@ import AppProvider from "@/context/AppProvider";
 import StoreProvider from "@/context/StoreProvider";
 import { GetUserProfile } from "@/lib/actions/auth";
 import AvatarSkeleton from "@/components/web/AvatarSkeleton";
+import { MobileCaptionHeaderCaption } from "@/components/web/DashboardCaption";
+import ShowPageName from "@/components/web/ShowPageName";
 
 export default async function Layout({ children }: { children: ReactNode }) {
   const profile = await GetUserProfile();
@@ -16,21 +18,21 @@ export default async function Layout({ children }: { children: ReactNode }) {
   return (
     <AppProvider>
       <StoreProvider>
-        <main className="min-h-dvh bg-muted">
+        <main className="min-h-dvh bg-custom-background">
           <Asidebar />
 
           {/* Header - margin adjusts based on sidebar state */}
           <header
             className="
-              fixed top-0 bg-white  right-0 z-30 
+              fixed top-0 bg-custom-background md:bg-background  right-0 z-30 
               h-16 flex items-center justify-between
-              border-b px-4
+              md:border-b px-4
               transition-all duration-300 ease-in-out
               left-0 md:left-14
-              md:group-hover/sidebar:left-64
+              md:group-hover/sidebar:left-64 max-sm:flex-row-reverse
             "
           >
-            <div className="flex items-center w-[80%] gap-3">
+            <div className="flex items-center md:w-[80%] gap-3">
               <MobileSidebar />
               <Input
                 type="search"
@@ -39,8 +41,8 @@ export default async function Layout({ children }: { children: ReactNode }) {
               />
             </div>
 
-            <div className="flex items-center gap-3">
-              <Link href={"/learner/notification"}>
+            <div className="flex items-center gap-1 md:gap-3">
+              <Link href={"/learner/notification"} className="max-sm:hidden">
                 <Bell size={24} />
               </Link>
               <Suspense fallback={<AvatarSkeleton />}>
@@ -51,6 +53,11 @@ export default async function Layout({ children }: { children: ReactNode }) {
                   </AvatarFallback>
                 </Avatar>
               </Suspense>
+
+              <MobileCaptionHeaderCaption
+                title={`Welcome back, ${profile?.full_name.split(" ")[0]}!👋🏾`}
+                text="Ready to ace your next exam?"
+              />
             </div>
           </header>
 
@@ -62,6 +69,7 @@ export default async function Layout({ children }: { children: ReactNode }) {
               md:ml-14
             "
           >
+            <ShowPageName />
             {children}
           </section>
         </main>

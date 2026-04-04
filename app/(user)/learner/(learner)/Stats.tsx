@@ -41,14 +41,15 @@ export default function StatsGrid({ stats }: { stats: any }) {
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
       {statsToUse.map(({ label, value, icon: Icon, color }, index) => (
-        <Card key={index} className="md:mt-4">
-          <CardDescription className="h-25 flex items-center justify-between rounded-xl p-4">
+        <Card
+          key={index}
+          className={`md:mt-4   ${index === 3 && "max-sm:hidden"} ${index === 2 && "max-sm:col-span-full"}`}
+        >
+          <CardDescription className=" h-18 md:h-22 flex items-center justify-between rounded-xl p-4">
             {/* LEFT: Text */}
             <div className="flex flex-col gap-2">
               <span className="text-sm text-[#78767D]">{label}</span>
-              <span className="md:text-lg lg:text-2xl font-medium text-black">
-                {value}
-              </span>
+              <h1 className="text-2xl font-medium text-black">{value}</h1>
             </div>
 
             {/* RIGHT: Icon */}
