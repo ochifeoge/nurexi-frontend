@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -14,12 +14,13 @@ import {
 } from "lucide-react";
 import { useCourse } from "@/context/CourseProvider";
 import { Section } from "@/lib/types/course";
-import { cn } from "@/lib/utils";
+import { cn, debounce } from "@/lib/utils";
 import ActualLesson from "./Lesson";
 
 const ActualSection = ({ section }: { section: Section }) => {
   const {
     handleDeleteSection,
+    handleUpdateSection,
     updateSectionTitle,
     handleAddLesson,
     isLoading,
@@ -38,6 +39,24 @@ const ActualSection = ({ section }: { section: Section }) => {
     if (localTitle.trim() !== section.title) {
       updateSectionTitle(section.id, localTitle.trim() || "Untitled section");
     }
+  };
+
+  useEffect(() => {
+    setLocalTitle(section.title);
+  }, [section.title]);
+
+  const debouncedUpdate = useCallback(
+    debounce((newTitle: string) => {
+      handleUpdateSection(section.id, { title: newTitle });
+    }, 1000),
+    [section.id],
+  );
+
+  useEffect(() => () => debouncedUpdate.cancel(), [debouncedUpdate]);
+
+  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setLocalTitle(e.target.value);
+    debouncedUpdate(e.target.value);
   };
 
   const handleTitleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -77,7 +96,7 @@ const ActualSection = ({ section }: { section: Section }) => {
             <Input
               autoFocus
               value={localTitle}
-              onChange={(e) => setLocalTitle(e.target.value)}
+              onChange={handleTitleChange}
               onBlur={handleTitleBlur}
               onKeyDown={handleTitleKeyDown}
               className="h-7 text-sm font-medium px-2 py-0 border-primary"

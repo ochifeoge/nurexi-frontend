@@ -196,10 +196,14 @@ export async function updateSection(
     .single();
 
   if (error) {
+    console.log(error);
     throw new Error("Failed to update section");
   }
 
-  return data;
+  return {
+    success: true,
+    data,
+  };
 }
 
 export async function deleteSection(sectionId: string) {

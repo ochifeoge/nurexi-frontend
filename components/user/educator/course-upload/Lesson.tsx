@@ -27,6 +27,10 @@ import { Lesson, LessonType } from "@/lib/types/course";
 import { debounce } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 
+import ReactPlayer from "react-player";
+import { useDeleteWithUndo } from "@/hooks/useDeleteWithUndo";
+import { deleteLesson } from "@/lib/actions/course-action";
+
 // ─── content type icon ────────────────────────────────────────────────────────
 function ContentTypeIcon({ type }: { type: LessonType }) {
   if (type === "video") return <Video className="h-3.5 w-3.5" />;
@@ -47,24 +51,34 @@ function VideoPreview({
   return (
     <div className="rounded-xl border border-border bg-muted/30 overflow-hidden">
       {asset.thumbnail_url && (
-        <div className="relative aspect-video bg-black">
-          <img
-            src={asset.thumbnail_url}
-            alt="Video thumbnail"
-            className="w-full h-full object-cover opacity-80"
-          />
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="bg-black/50 rounded-full p-3">
-              <Video className="h-6 w-6 text-white" />
+        <>
+          <div className="relative aspect-video bg-black">
+            <img
+              src={asset.thumbnail_url}
+              alt="Video thumbnail"
+              className="w-full h-full object-cover opacity-80"
+            />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="bg-black/50 rounded-full p-3">
+                <Video className="h-6 w-6 text-white" />
+              </div>
             </div>
+            {asset.duration_seconds && (
+              <span className="absolute bottom-2 right-2 bg-black/70 text-white text-[11px] font-mono px-1.5 py-0.5 rounded">
+                {Math.floor(asset.duration_seconds / 60)}:
+                {String(asset.duration_seconds % 60).padStart(2, "0")}
+              </span>
+            )}
           </div>
-          {asset.duration_seconds && (
-            <span className="absolute bottom-2 right-2 bg-black/70 text-white text-[11px] font-mono px-1.5 py-0.5 rounded">
-              {Math.floor(asset.duration_seconds / 60)}:
-              {String(asset.duration_seconds % 60).padStart(2, "0")}
-            </span>
-          )}
-        </div>
+          {/* <ReactPlayer
+            src={`https://res.cloudinary.com/douvlyzys/video/upload/sp_auto/v1781033153/courses/7775b7c0-b595-4c61-9825-4c2f3e1f1c22/c465ad42-d709-49eb-bd12-b5dea559aba7/courses/c465ad42-d709-49eb-bd12-b5dea559aba7/lesson_video.m3u8`}
+            playing={true}
+            width="100%"
+            height="auto"
+            playIcon={<Video className="h-6 w-6 text-white" />}
+            controls={true}
+          /> */}
+        </>
       )}
       <div className="flex items-center justify-between px-3 py-2">
         <span className="text-[12px] text-muted-foreground truncate">
@@ -146,7 +160,18 @@ const ActualLesson = ({
 }) => {
   const { handleUpdateLesson, handleDeleteLesson, courseId, userId } =
     useCourse();
+
   const supabase = createClient();
+
+  const { executeDelete, isLoading } = useDeleteWithUndo({
+    deleteFn: deleteLesson,
+    onSuccess: () => {
+      handleDeleteLesson(sectionId, lesson.id);
+    },
+    onError: (message) => {
+      toast.error(message);
+    },
+  });
 
   // ── signed URL for PDF preview ──────────────────────────────────────────────
   const [pdfSignedUrl, setPdfSignedUrl] = useState<string | null>(null);
@@ -285,7 +310,8 @@ const ActualLesson = ({
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => handleDeleteLesson(sectionId, lesson.id)}
+          onClick={() => executeDelete(lesson.id)}
+          disabled={isLoading}
           className={cn(
             "h-7 w-7 p-0 text-muted-foreground hover:text-destructive ml-auto shrink-0",
             hasAsset && "ml-1",
@@ -338,9 +364,12 @@ const ActualLesson = ({
                   maxFiles: 1,
                   resourceType: "video",
                   folder: `courses/${courseId}/${lesson.id}`,
+                  publicId: `courses/${lesson.id}/lesson_video`,
+                  tags: [],
+                  context: {},
                   sources: ["local", "dropbox", "google_drive"],
                   clientAllowedFormats: ["mp4", "webm", "mov"],
-                  maxFileSize: 100_000_000,
+                  maxFileSize: 50000000,
                 }}
                 signatureEndpoint="/api/cloudinary/signature"
                 onSuccess={(result: any) => {
@@ -348,10 +377,12 @@ const ActualLesson = ({
                     toast.error("Only videos are allowed");
                     return;
                   }
+                  console.log(result);
                   handleUpdateLesson(sectionId, lesson.id, {
                     asset: {
                       provider: "cloudinary",
                       type: "video",
+                      lessonId: lesson.id,
                       public_id: result.info.public_id,
                       asset_id: result.info.asset_id,
                       thumbnail_url: result.info.thumbnail_url,

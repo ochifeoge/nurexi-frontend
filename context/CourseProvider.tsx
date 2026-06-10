@@ -17,6 +17,7 @@ import {
   deleteLesson,
   getSectionLessons,
   updateLesson,
+  updateSection,
 } from "@/lib/actions/course-action";
 import { Lesson, Section } from "@/lib/types/course";
 
@@ -28,13 +29,14 @@ interface CourseContextType {
   handleAddSection: () => Promise<void>;
   handleDeleteSection: (sectionId: string) => Promise<void>;
   updateSectionTitle: (id: string, newTitle: string) => void;
+  handleUpdateSection: (id: string, update: Partial<Section>) => Promise<void>;
   handleAddLesson: (sectionId: string) => Promise<void>;
   handleUpdateLesson: (
     sectionId: string,
     lessonId: string,
     updates: Partial<Lesson>,
   ) => Promise<void>;
-  handleDeleteLesson: (sectionId: string, lessonId: string) => Promise<void>;
+  handleDeleteLesson: (sectionId: string, lessonId: string) => void;
   userId: string;
 }
 
@@ -163,6 +165,21 @@ export const CourseProvider = ({
     );
   };
 
+  const handleUpdateSection = async (id: string, updates: Partial<Section>) => {
+    console.log("updates: from section: ", updates);
+    try {
+      const response = await updateSection(id, updates);
+      if (response.success) {
+        setSections((prev) =>
+          prev.map((s) => (s.id === id ? { ...s, ...updates } : s)),
+        );
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error("Failed to update section");
+    }
+  };
+
   // Add lesson to section
   async function handleAddLesson(sectionId: string) {
     try {
@@ -212,23 +229,17 @@ export const CourseProvider = ({
   }
 
   // Delete lesson
-  async function handleDeleteLesson(sectionId: string, lessonId: string) {
-    try {
-      await deleteLesson(lessonId);
-      setSections((prev) =>
-        prev.map((section) =>
-          section.id === sectionId
-            ? {
-                ...section,
-                lessons: section.lessons.filter((l) => l.id !== lessonId),
-              }
-            : section,
-        ),
-      );
-      toast.success("Lesson deleted");
-    } catch (error) {
-      toast.error("Failed to delete lesson");
-    }
+  function handleDeleteLesson(sectionId: string, lessonId: string) {
+    setSections((prev) =>
+      prev.map((section) =>
+        section.id === sectionId
+          ? {
+              ...section,
+              lessons: section.lessons.filter((l) => l.id !== lessonId),
+            }
+          : section,
+      ),
+    );
   }
 
   return (
@@ -240,6 +251,7 @@ export const CourseProvider = ({
         courseId,
         handleAddSection,
         handleDeleteSection,
+        handleUpdateSection,
         updateSectionTitle,
         handleAddLesson,
         handleUpdateLesson,

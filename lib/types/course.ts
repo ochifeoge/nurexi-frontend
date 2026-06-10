@@ -39,6 +39,8 @@ export interface LessonAsset {
 
   thumbnail_url?: string;
 
+  lessonId?: string;
+
   duration_seconds?: number;
 
   filename?: string;
