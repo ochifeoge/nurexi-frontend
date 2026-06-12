@@ -26,7 +26,7 @@ export default function CourseSection() {
           className="bg-secondary hover:bg-secondary/90"
           disabled={isLoading}
         >
-          <FaPlus /> Add section
+          <FaPlus /> {isLoading ? "Adding..." : "Add section"}
         </Button>
       </div>
 

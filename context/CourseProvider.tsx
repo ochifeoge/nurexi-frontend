@@ -20,16 +20,21 @@ import {
   updateSection,
 } from "@/lib/actions/course-action";
 import { Lesson, Section } from "@/lib/types/course";
+import { Quiz } from "@/lib/types/questions";
+import { getUUID } from "@/lib/utils";
 
 interface CourseContextType {
   sections: Section[];
   isLoading: boolean;
   errorState: string;
   courseId: string;
+  userId: string;
+
   handleAddSection: () => Promise<void>;
   handleDeleteSection: (sectionId: string) => Promise<void>;
   updateSectionTitle: (id: string, newTitle: string) => void;
   handleUpdateSection: (id: string, update: Partial<Section>) => Promise<void>;
+
   handleAddLesson: (sectionId: string) => Promise<void>;
   handleUpdateLesson: (
     sectionId: string,
@@ -37,7 +42,11 @@ interface CourseContextType {
     updates: Partial<Lesson>,
   ) => Promise<void>;
   handleDeleteLesson: (sectionId: string, lessonId: string) => void;
-  userId: string;
+
+  quizzes: Quiz[];
+  addQuiz: () => void;
+  handleRemoveQuiz: (id: string) => void;
+  updateQuiz: (id: string, updates: Partial<Quiz>) => void;
 }
 
 const CourseContext = createContext<CourseContextType | undefined>(undefined);
@@ -54,6 +63,42 @@ export const CourseProvider = ({
   const [sections, setSections] = useState<Section[]>([]);
   const [errorState, setErrorState] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [quizzes, setQuizzes] = useState<Quiz[]>([
+    {
+      id: "1",
+      question: "",
+      questionType: "mcq",
+      options: ["", "", "", ""],
+      answer: "",
+    },
+  ]);
+
+  const addQuiz = () => {
+    setQuizzes([
+      ...quizzes,
+      {
+        id: getUUID(),
+        question: "",
+        questionType: "mcq",
+        options: ["", "", "", ""] as string[],
+        answer: "",
+      },
+    ]);
+  };
+
+  const handleRemoveQuiz = (id: string) => {
+    const confirm = window.confirm(
+      "Are you sure you want to remove this quiz?",
+    );
+    if (!confirm) return;
+    setQuizzes((prev) => prev.filter((quiz) => quiz.id !== id));
+  };
+
+  const updateQuiz = (id: string, updates: Partial<Quiz>) => {
+    setQuizzes((prev) =>
+      prev.map((quiz) => (quiz.id === id ? { ...quiz, ...updates } : quiz)),
+    );
+  };
 
   // Fetch sections and lessons on load
   useEffect(() => {
@@ -61,7 +106,25 @@ export const CourseProvider = ({
       setIsLoading(true);
       try {
         const allSections = await getAllCourseSections(courseId);
+
         if (allSections) {
+          const allQuizzes = allSections.flatMap(
+            (section: Section) => section.quiz_data || [],
+          );
+          if (allQuizzes.length > 0) {
+            setQuizzes(allQuizzes);
+          } else {
+            setQuizzes([
+              {
+                id: getUUID(),
+                question: "",
+                questionType: "mcq",
+                options: ["", "", "", ""],
+                answer: "",
+              },
+            ]);
+          }
+
           const sectionsWithLessons = await Promise.all(
             allSections.map(async (section: any) => {
               const lessons = await getSectionLessons(section.id);
@@ -166,8 +229,8 @@ export const CourseProvider = ({
   };
 
   const handleUpdateSection = async (id: string, updates: Partial<Section>) => {
-    console.log("updates: from section: ", updates);
     try {
+      setIsLoading(true);
       const response = await updateSection(id, updates);
       if (response.success) {
         setSections((prev) =>
@@ -175,8 +238,9 @@ export const CourseProvider = ({
         );
       }
     } catch (error) {
-      console.log(error);
       toast.error("Failed to update section");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -249,14 +313,21 @@ export const CourseProvider = ({
         isLoading,
         errorState,
         courseId,
+        userId,
+
         handleAddSection,
         handleDeleteSection,
         handleUpdateSection,
         updateSectionTitle,
+
         handleAddLesson,
         handleUpdateLesson,
         handleDeleteLesson,
-        userId,
+
+        quizzes,
+        addQuiz,
+        handleRemoveQuiz,
+        updateQuiz,
       }}
     >
       {children}

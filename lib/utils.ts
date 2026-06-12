@@ -112,3 +112,13 @@ export function debounce<T extends (...args: any[]) => void>(
 
   return debounced;
 }
+
+export const getUUID = (): string => {
+  if (typeof window === "undefined") {
+    // Server-side environment fallback
+    const crypto = require("crypto");
+    return crypto.randomUUID();
+  }
+  // Client-side environment
+  return window.crypto.randomUUID();
+};

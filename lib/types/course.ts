@@ -1,3 +1,5 @@
+import { Quiz } from "./questions";
+
 export interface BaseCourse {
   id: string;
   title: string;
@@ -63,5 +65,7 @@ export interface Lesson {
 export interface Section {
   id: string;
   title: string;
+  position?: number;
+  quiz_data: Quiz[] | null;
   lessons: Lesson[];
 }

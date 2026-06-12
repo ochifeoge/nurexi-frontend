@@ -6,6 +6,7 @@ import { Separator } from "@/components/ui/separator";
 import CourseOverviewForm from "./CourseOverviewForm";
 import CourseSection from "./CourseSections";
 import { CourseProvider } from "@/context/CourseProvider";
+import Quiz from "./Quiz";
 
 const courseUploadTabs = [
   {
@@ -19,8 +20,8 @@ const courseUploadTabs = [
     icon: <FaBook />,
   },
   {
-    label: "Quiz",
-    value: "quiz",
+    label: "Quizzes",
+    value: "course-quiz",
     icon: <FaUpload />,
   },
   {
@@ -74,11 +75,7 @@ const EditCourse = ({ course, userId }: { course: any; userId: string }) => {
             <h2 className="text-xl font-semibold">Pricing Settings</h2>
           </div>
         )}
-        {currentSection === "course-publish" && (
-          <div className="p-10 text-center border rounded-lg bg-slate-50">
-            <h2 className="text-xl font-semibold">Publish Settings</h2>
-          </div>
-        )}
+        {currentSection === "course-quiz" && <Quiz />}
       </div>
     </CourseProvider>
   );
