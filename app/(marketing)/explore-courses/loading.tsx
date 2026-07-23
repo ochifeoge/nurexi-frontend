@@ -45,7 +45,7 @@ export default function ExploreCoursesLoading() {
 
       {/* Skeleton for Pagination */}
       <div className="mt-6 md:mt-10 flex justify-center">
-        <Skeleton className="h-10 w-[300px]" />
+        <Skeleton className="h-10 w-75" />
       </div>
     </div>
   );

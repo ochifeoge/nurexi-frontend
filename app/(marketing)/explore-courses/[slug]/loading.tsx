@@ -16,9 +16,9 @@ export default function CoursePageLoading() {
               <Skeleton className="h-6 w-32" />
             </div>
           </div>
-          
+
           {/* Main content placeholder */}
-          <Skeleton className="h-[300px] w-full rounded-xl" />
+          <Skeleton className="h-75 w-full rounded-xl" />
 
           {/* Skeleton for CourseContentAccordion / What you will learn */}
           <div className="space-y-4">
@@ -64,7 +64,7 @@ export default function CoursePageLoading() {
 
               {/* Enroll Button */}
               <Skeleton className="h-10 w-full" />
-              
+
               {/* Guarantee */}
               <div className="flex justify-center">
                 <Skeleton className="h-3 w-40" />

@@ -124,6 +124,10 @@ export interface LessonAsset {
   type: "video" | "pdf";
 
   public_id?: string;
+  playback_url?: string;
+  secure_url?: string;
+  width?: number;
+  height?: number;
 
   asset_id?: string;
 
@@ -145,7 +149,7 @@ export interface Lesson {
   content_type: LessonType;
 
   asset?: LessonAsset | null;
-
+  pending_asset: LessonAsset | null;
   is_preview: boolean;
   text_content?: string;
 }
